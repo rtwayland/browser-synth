@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import { Container } from 'semantic-ui-react';
 import { store } from '../store';
 import { soundTypes } from '../constants';
 import Duration from './Duration';
@@ -39,12 +40,12 @@ const App = () => {
   });
 
   return (
-    <div>
-      <Octave />
-      <Duration />
+    <Container style={{ paddingTop: 50 }}>
       <SoundTypes />
+      <Duration />
       <Keyboard playNote={play} />
-    </div>
+      <Octave />
+    </Container>
   );
 };
 
