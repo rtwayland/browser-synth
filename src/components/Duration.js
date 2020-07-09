@@ -12,9 +12,13 @@ const INC = 0.5;
 const Duration = () => {
   const { duration, dispatch } = useContext(store);
 
+  const setDuration = (value) => {
+    dispatch({ type: UPDATE_DURATION, payload: value });
+  };
+
   const handleChange = ({ target }) => {
     const newDuration = parseFloat(target.value);
-    dispatch({ type: UPDATE_DURATION, payload: newDuration });
+    setDuration(newDuration);
   };
 
   const handleKeyDown = ({ key }) => {
@@ -22,13 +26,13 @@ const Duration = () => {
       case '+':
       case 'ArrowUp': {
         const val = duration + INC;
-        if (val < MAX) dispatch({ type: UPDATE_DURATION, payload: val });
+        if (val < MAX) setDuration(val);
         break;
       }
       case '-':
       case 'ArrowDown': {
         const val = duration - INC;
-        if (val > MIN) dispatch({ type: UPDATE_DURATION, payload: val });
+        if (val > MIN) setDuration(val);
         break;
       }
       default:
