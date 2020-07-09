@@ -5,6 +5,10 @@ import { store } from '../store';
 import { UPDATE_DURATION } from '../types';
 import useKeyDown from '../hooks/useKeyDown';
 
+const MAX = 40;
+const MIN = 0.1;
+const INC = 0.5;
+
 const Duration = () => {
   const { duration, dispatch } = useContext(store);
 
@@ -17,14 +21,14 @@ const Duration = () => {
     switch (key) {
       case '+':
       case 'ArrowUp': {
-        const val = duration + 0.5;
-        if (val < 20) dispatch({ type: UPDATE_DURATION, payload: val });
+        const val = duration + INC;
+        if (val < MAX) dispatch({ type: UPDATE_DURATION, payload: val });
         break;
       }
       case '-':
       case 'ArrowDown': {
-        const val = duration - 0.5;
-        if (val > 0) dispatch({ type: UPDATE_DURATION, payload: val });
+        const val = duration - INC;
+        if (val > MIN) dispatch({ type: UPDATE_DURATION, payload: val });
         break;
       }
       default:
@@ -45,9 +49,9 @@ const Duration = () => {
           <input
             type="range"
             value={duration}
-            min={0.1}
-            max={40}
-            step={0.1}
+            min={MIN}
+            max={MAX}
+            step={INC}
             onChange={handleChange}
             style={{ width: 450 }}
           />
