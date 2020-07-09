@@ -41,22 +41,29 @@ const Duration = () => {
           Duration:
           <Label.Detail>{duration}</Label.Detail>
         </Label>
-        <input
-          type="range"
-          value={duration}
-          min={0.1}
-          max={20}
-          step={0.1}
-          onChange={handleChange}
-        />
+        <SliderContainer>
+          <input
+            type="range"
+            value={duration}
+            min={0.1}
+            max={40}
+            step={0.1}
+            onChange={handleChange}
+            style={{ width: 450 }}
+          />
+        </SliderContainer>
       </DurationContainer>
     </>
   );
 };
 
 const DurationContainer = styled.div({
-  display: 'flex',
-  alignItems: 'center',
+  // display: 'flex',
+  // alignItems: 'center',
+});
+
+const SliderContainer = styled.div({
+  marginTop: 15,
 });
 
 export default Duration;
