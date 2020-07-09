@@ -71,7 +71,7 @@ const Octave = () => {
           <Button
             key={oct}
             content={i + 1}
-            active={octave === i}
+            primary={octave === i}
             onClick={() => setOctave(i)}
           />
         ))}
