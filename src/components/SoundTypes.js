@@ -3,7 +3,7 @@ import { Button } from 'semantic-ui-react';
 import { store } from '../store';
 import { UPDATE_SOUND_TYPE } from '../types';
 
-const Duration = () => {
+const SoundTypes = () => {
   const { soundType, dispatch } = useContext(store);
   const handleTypeChange = (type) => {
     dispatch({ type: UPDATE_SOUND_TYPE, payload: type });
@@ -45,4 +45,4 @@ const Duration = () => {
   );
 };
 
-export default Duration;
+export default SoundTypes;
