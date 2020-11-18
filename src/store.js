@@ -1,10 +1,16 @@
 import React, { createContext, useReducer } from 'react';
-import { UPDATE_DURATION, UPDATE_OCTAVE, UPDATE_SOUND_TYPE } from './types';
+import {
+  UPDATE_DURATION,
+  UPDATE_OCTAVE,
+  UPDATE_SOUND_TYPE,
+  ADD_PLAYING_KEY,
+  REMOVE_PLAYING_KEY,
+} from './types';
 
 const initialState = {
   soundType: 0,
   octave: 4,
-  duration: 0.8,
+  duration: 1,
 };
 const store = createContext(initialState);
 const { Provider } = store;
@@ -22,6 +28,14 @@ const StateProvider = ({ children }) => {
         return { ...state, octave: payload };
       case UPDATE_SOUND_TYPE:
         return { ...state, soundType: payload };
+      case ADD_PLAYING_KEY: {
+        const keys = [...state.playingKeys, payload];
+        return { ...state, playingKeys: keys };
+      }
+      case REMOVE_PLAYING_KEY: {
+        const keys = state.playingKeys.filter((key) => key !== payload);
+        return { ...state, playingKeys: keys };
+      }
       default:
         return state;
     }

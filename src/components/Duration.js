@@ -7,7 +7,7 @@ import useKeyDown from '../hooks/useKeyDown';
 
 const MAX = 40;
 const MIN = 0.1;
-const INC = 0.5;
+const INC = 1;
 
 const Duration = () => {
   const { duration, dispatch } = useContext(store);

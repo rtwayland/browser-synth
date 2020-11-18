@@ -3,16 +3,21 @@ import styled from '@emotion/styled';
 import { Button } from 'semantic-ui-react';
 import { store } from '../store';
 import { notes } from '../constants';
+// import { ADD_PLAYING_KEY, REMOVE_PLAYING_KEY } from '../types';
 import useKeyDown from '../hooks/useKeyDown';
 import useKeyUp from '../hooks/useKeyUp';
 
 const Keyboard = ({ playNote }) => {
   const { octave } = useContext(store);
+  // const { octave, playingKeys, dispatch } = useContext(store);
   const [playingKeys, setPlayingKeys] = useState([]);
 
   const handleNote = (note, event, play) => {
     if (!event.repeat) {
       if (play) playNote(note);
+
+      // const type = play ? ADD_PLAYING_KEY : REMOVE_PLAYING_KEY;
+      // dispatch({ type, payload: note });
 
       const keys = play
         ? [...playingKeys, note]
@@ -24,75 +29,80 @@ const Keyboard = ({ playNote }) => {
 
   const handleKey = (event, play) => {
     const { key } = event;
+    let note;
+
     switch (key) {
       case 'a':
       case 'A':
       case 'å':
-        handleNote(notes.C[octave], event, play);
+        note = notes.C[octave];
         break;
       case 'w':
       case 'W':
       case '∑':
-        handleNote(notes['C#'][octave], event, play);
+        note = notes['C#'][octave];
         break;
       case 's':
       case 'S':
       case 'ß':
-        handleNote(notes.D[octave], event, play);
+        note = notes.D[octave];
         break;
       case 'e':
       case 'E':
       case '´':
-        handleNote(notes.Eb[octave], event, play);
+        note = notes.Eb[octave];
         break;
       case 'd':
       case 'D':
       case '∂':
-        handleNote(notes.E[octave], event, play);
+        note = notes.E[octave];
         break;
       case 'f':
       case 'F':
       case 'ƒ':
-        handleNote(notes.F[octave], event, play);
+        note = notes.F[octave];
         break;
       case 'u':
       case 'U':
       case '¨':
-        handleNote(notes['F#'][octave], event, play);
+        note = notes['F#'][octave];
         break;
       case 'j':
       case 'J':
       case '∆':
-        handleNote(notes.G[octave], event, play);
+        note = notes.G[octave];
         break;
       case 'i':
       case 'I':
       case 'ˆ':
-        handleNote(notes['G#'][octave], event, play);
+        note = notes['G#'][octave];
         break;
       case 'k':
       case 'K':
       case '˚':
-        handleNote(notes.A[octave], event, play);
+        note = notes.A[octave];
         break;
       case 'o':
       case 'O':
       case 'ø':
-        handleNote(notes.Bb[octave], event, play);
+        note = notes.Bb[octave];
         break;
       case 'l':
       case 'L':
       case '¬':
-        handleNote(notes.B[octave], event, play);
+        note = notes.B[octave];
         break;
       case ';':
       case ':':
       case '…':
-        if (octave < 8) handleNote(notes.C[octave + 1], event, play);
-        break;
+        if (octave < 8) {
+          note = notes.C[octave + 1];
+          break;
+        } else return;
       default:
-        break;
+        return;
     }
+    handleNote(note, event, play);
   };
   useKeyDown((event) => handleKey(event, true));
   useKeyUp((event) => handleKey(event, false));
