@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, { useContext, useRef } from 'react';
 import { Button, Container } from 'semantic-ui-react';
 import * as Tone from 'tone';
 import { store } from '../store';
@@ -7,11 +7,10 @@ import Keyboard from './Keyboard';
 import SoundTypes from './SoundTypes';
 import useKeyDown from '../hooks/useKeyDown';
 import Patterns from './Patterns';
+import { ADD_NOTE_TO_ARP } from '../types';
 
 const App = () => {
-  const { soundType: instrument } = useContext(store);
-  const [arpMode, setArpMode] = useState(false);
-  const [arpArray, setArpArray] = useState([]);
+  const { arpMode, soundType: instrument, dispatch } = useContext(store);
   const activeSynthsRef = useRef({});
 
   const init = async () => {
@@ -37,8 +36,7 @@ const App = () => {
 
   const play = (note, playing = true, fromMouse = false) => {
     if (arpMode) {
-      const arr = [...arpArray, note];
-      if (playing) setArpArray(arr);
+      if (playing) dispatch({ type: ADD_NOTE_TO_ARP, payload: note });
     } else if (fromMouse) {
       const synth = new Tone[instrument]().toDestination();
       synth.triggerAttackRelease(note, '8n');
@@ -76,7 +74,7 @@ const App = () => {
       <Button type="button" onClick={init} content="Init" />
       <Button type="button" onClick={clearSynths} content="Clear Synths" />
       <SoundTypes />
-      <Patterns setArpMode={setArpMode} />
+      <Patterns />
       <Keyboard playNote={play} />
       <Octave />
     </Container>

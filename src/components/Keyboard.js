@@ -3,7 +3,6 @@ import styled from '@emotion/styled';
 import { Button } from 'semantic-ui-react';
 import { store } from '../store';
 import { notes } from '../constants';
-// import { ADD_PLAYING_KEY, REMOVE_PLAYING_KEY } from '../types';
 import useKeyDown from '../hooks/useKeyDown';
 import useKeyUp from '../hooks/useKeyUp';
 

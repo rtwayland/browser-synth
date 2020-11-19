@@ -1,40 +1,39 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import * as Tone from 'tone';
 import { Button, Checkbox } from 'semantic-ui-react';
+import { store } from '../store';
+import { RESET_ARP_ARRAY, SET_ARP_MODE, TOGGLE_ARP_MODE } from '../types';
 
-const Patterns = ({
-  arpArray,
-  setArpMode,
-  setArpArray,
-  instrument,
-  arpMode,
-}) => {
-  const [activePatterns, setActivePatterns] = useState({});
-  const removePattern = (id) => {
-    const pattern = activePatterns[id];
-    if (pattern) {
-      pattern.pattern.dispose();
-      const copy = { ...activePatterns };
-      delete copy[id];
-      setActivePatterns(copy);
+const Patterns = () => {
+  const { arpMode, arpArray, soundType: instrument, dispatch } = useContext(
+    store
+  );
+  const [activePatterns, setActivePatterns] = useState([]);
+
+  const removePattern = ({ id, pattern }) => {
+    if (id) {
+      pattern.dispose();
+      const patterns = activePatterns.filter(
+        (activePattern) => activePattern.id !== id
+      );
+      setActivePatterns(patterns);
     }
   };
 
-  const addPattern = (id, newPattern) => {
-    const oldPattern = activePatterns[id];
-    if (oldPattern) removePattern(id);
-    const copy = { ...activePatterns };
-    copy[id] = { pattern: newPattern, playing: true };
-    setActivePatterns(copy);
+  const addPattern = (newPattern) => {
+    const patterns = [newPattern, ...activePatterns];
+    setActivePatterns(patterns);
   };
 
-  const handlePlayPause = (id) => {
-    const { [id]: patternOb } = activePatterns;
-    const { pattern, playing = true } = patternOb;
+  const handlePlayPause = (patternOb) => {
+    const { id, pattern, playing = true } = patternOb;
     if (playing) pattern.stop();
     else pattern.start();
     const updatedPattern = { ...patternOb, playing: !playing };
-    const updatedPatterns = { ...activePatterns, [id]: updatedPattern };
+    const updatedPatterns = activePatterns.map((activePattern) => {
+      if (activePattern.id === id) return updatedPattern;
+      return activePattern;
+    });
     setActivePatterns(updatedPatterns);
   };
 
@@ -44,60 +43,74 @@ const Patterns = ({
     const updatedPatterns = { ...activePatterns, [id]: updatedPattern };
     setActivePatterns(updatedPatterns);
   };
+
   const clearPatterns = () => {
-    const patterns = Object.keys(activePatterns);
-    patterns.forEach((id) => {
-      removePattern(id);
+    // const patterns = Object.keys(activePatterns);
+    activePatterns.forEach((pattern) => {
+      removePattern(pattern);
     });
   };
+
   const startArp = () => {
     if (arpArray.length) {
-      setArpMode(false);
-      setArpArray([]);
+      const notes = [...arpArray];
+      const loopStyle = 'upDown';
+      dispatch({ type: SET_ARP_MODE, payload: false });
+      dispatch({ type: RESET_ARP_ARRAY });
       const synth = new Tone[instrument]().toDestination();
       const id = arpArray.join(' ');
       const pattern = new Tone.Pattern(
-        (time, _note) => {
+        (time, note) => {
           // handleActivePatternNote(id, _note);
-          synth.triggerAttackRelease(_note, 0.1);
+          synth.triggerAttackRelease(note, 0.1);
         },
-        arpArray,
-        'upDown'
+        notes,
+        loopStyle
       );
       pattern.start(0);
       Tone.Transport.bpm.value = 200;
       Tone.Transport.start();
-      // activePatternsRef.current[id] = pattern;
-      addPattern(id, pattern);
+      addPattern({ id, pattern, playing: true });
     }
   };
+
   return (
     <>
+      <h2>Patterns</h2>
       <Button type="button" onClick={clearPatterns} content="Clear Patterns" />
       <Checkbox
         toggle
         checked={arpMode}
-        onChange={() => setArpMode(!arpMode)}
+        onChange={() => dispatch({ type: TOGGLE_ARP_MODE })}
       />
-      <Button type="button" onClick={startArp} content="Start Arp" />
-      <h2>Active Patterns</h2>
-      {Object.keys(activePatterns).map((patternId) => {
-        const notes = patternId.split(' ');
-        const { activeNote, playing } = activePatterns[patternId];
+      {arpMode && (
+        <>
+          <h3>Array</h3>
+          <div>
+            {arpArray.map((note) => {
+              return <Button key={note} content={note} />;
+            })}
+            <Button type="button" onClick={startArp} content="Start" />
+          </div>
+        </>
+      )}
+      {activePatterns.map((activePattern) => {
+        const { id, activeNote, playing } = activePattern;
+        const notes = id.split(' ');
         return (
-          <div key={patternId}>
+          <div key={id}>
             {notes.map((note) => (
               <Button
-                key={`${patternId}${note}`}
+                key={`${id}${note}`}
                 content={note}
                 active={note === activeNote}
               />
             ))}
             <Button
-              onClick={() => handlePlayPause(patternId)}
+              onClick={() => handlePlayPause(activePattern)}
               icon={playing ? 'pause' : 'play'}
             />
-            <Button onClick={() => removePattern(patternId)} icon="close" />
+            <Button onClick={() => removePattern(activePattern)} icon="close" />
           </div>
         );
       })}
