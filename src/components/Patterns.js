@@ -1,8 +1,9 @@
 import React, { useContext, useState } from 'react';
+import { Button } from 'semantic-ui-react';
 import * as Tone from 'tone';
-import { Button, Checkbox } from 'semantic-ui-react';
+import { v4 as uuid } from 'uuid';
 import { store } from '../store';
-import { RESET_ARP_ARRAY, SET_ARP_MODE, TOGGLE_ARP_MODE } from '../types';
+import { RESET_ARP_ARRAY, SET_ARP_MODE } from '../types';
 
 const Patterns = () => {
   const { arpMode, arpArray, soundType: instrument, dispatch } = useContext(
@@ -37,15 +38,7 @@ const Patterns = () => {
     setActivePatterns(updatedPatterns);
   };
 
-  const handleActivePatternNote = (id, note) => {
-    const { [id]: patternOb } = activePatterns;
-    const updatedPattern = { ...patternOb, activeNote: note };
-    const updatedPatterns = { ...activePatterns, [id]: updatedPattern };
-    setActivePatterns(updatedPatterns);
-  };
-
   const clearPatterns = () => {
-    // const patterns = Object.keys(activePatterns);
     activePatterns.forEach((pattern) => {
       removePattern(pattern);
     });
@@ -58,10 +51,9 @@ const Patterns = () => {
       dispatch({ type: SET_ARP_MODE, payload: false });
       dispatch({ type: RESET_ARP_ARRAY });
       const synth = new Tone[instrument]().toDestination();
-      const id = arpArray.join(' ');
+      const id = uuid();
       const pattern = new Tone.Pattern(
         (time, note) => {
-          // handleActivePatternNote(id, _note);
           synth.triggerAttackRelease(note, 0.1);
         },
         notes,
@@ -70,41 +62,42 @@ const Patterns = () => {
       pattern.start(0);
       Tone.Transport.bpm.value = 200;
       Tone.Transport.start();
-      addPattern({ id, pattern, playing: true });
+      addPattern({ id, pattern, notes, playing: true });
     }
   };
 
   return (
     <>
       <h2>Patterns</h2>
-      <Button type="button" onClick={clearPatterns} content="Clear Patterns" />
-      <Checkbox
-        toggle
-        checked={arpMode}
-        onChange={() => dispatch({ type: TOGGLE_ARP_MODE })}
+      <Button onClick={clearPatterns} icon="refresh" />
+      <Button
+        primary
+        onClick={() => dispatch({ type: SET_ARP_MODE, payload: true })}
+        icon="plus"
       />
       {arpMode && (
         <>
-          <h3>Array</h3>
+          <h3>New Arpeggio</h3>
           <div>
             {arpArray.map((note) => {
-              return <Button key={note} content={note} />;
+              const key = uuid();
+              return <Button key={key} content={note} />;
             })}
-            <Button type="button" onClick={startArp} content="Start" />
+            {arpArray.length ? (
+              <Button onClick={startArp} content="Start" />
+            ) : (
+              <div>Selct notes from the keyboard below</div>
+            )}
           </div>
         </>
       )}
-      {activePatterns.map((activePattern) => {
-        const { id, activeNote, playing } = activePattern;
-        const notes = id.split(' ');
+      <h3>Active Patterns</h3>
+      {activePatterns.map((activePattern, i) => {
+        const { id, notes, playing } = activePattern;
         return (
-          <div key={id}>
+          <div key={id} style={{ margin: '10px 0' }}>
             {notes.map((note) => (
-              <Button
-                key={`${id}${note}`}
-                content={note}
-                active={note === activeNote}
-              />
+              <Button key={`${id}${note}${i + 1}`} content={note} />
             ))}
             <Button
               onClick={() => handlePlayPause(activePattern)}
