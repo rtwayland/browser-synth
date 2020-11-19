@@ -8,9 +8,10 @@ import {
 } from './types';
 
 const initialState = {
-  soundType: 0,
+  soundType: 'Synth',
+  // soundType: 0,
   octave: 4,
-  duration: 1,
+  duration: 0.5,
 };
 const store = createContext(initialState);
 const { Provider } = store;

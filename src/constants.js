@@ -13,4 +13,13 @@ export const notes = {
   B: [30.87, 61.74, 123.5, 246.9, 493.9, 987.8, 1976, 3951, 7902],
 };
 
-export const soundTypes = ['sine', 'triangle', 'square', 'sawtooth'];
+// export const soundTypes = ['sine', 'triangle', 'square', 'sawtooth'];
+export const soundTypes = [
+  'Synth',
+  'AMSynth',
+  'FMSynth',
+  'MembraneSynth',
+  // 'MetalSynth',
+  'MonoSynth',
+  // 'PluckSynth',
+];

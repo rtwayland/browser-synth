@@ -1,48 +1,82 @@
-import React, { useContext } from 'react';
-import { Container } from 'semantic-ui-react';
+import React, { useContext, useRef, useState } from 'react';
+import { Button, Container } from 'semantic-ui-react';
+import * as Tone from 'tone';
 import { store } from '../store';
-import { soundTypes } from '../constants';
-import Duration from './Duration';
 import Octave from './Octave';
 import Keyboard from './Keyboard';
 import SoundTypes from './SoundTypes';
 import useKeyDown from '../hooks/useKeyDown';
+import Patterns from './Patterns';
 
 const App = () => {
-  const { soundType: type, duration } = useContext(store);
-  let audio = new AudioContext();
-  let osc = null;
-  let gain = null;
+  const { soundType: instrument } = useContext(store);
+  const [arpMode, setArpMode] = useState(false);
+  const [arpArray, setArpArray] = useState([]);
+  const activeSynthsRef = useRef({});
 
-  const play = (frequency = 440) => {
-    osc = audio.createOscillator();
-    gain = audio.createGain();
+  const init = async () => {
+    await Tone.start();
+    console.log('ToneJS Ready');
+  };
 
-    osc.type = soundTypes[type];
-    osc.connect(gain);
+  const removeSynth = (id) => {
+    const { current: activeSynths } = activeSynthsRef;
+    const synth = activeSynths[id];
+    if (synth) {
+      synth.dispose();
+      delete activeSynthsRef.current[id];
+    }
+  };
 
-    osc.frequency.setValueAtTime(frequency, audio.currentTime);
+  const addSynth = (id, newSynth) => {
+    const { current: activeSynths } = activeSynthsRef;
+    const oldSynth = activeSynths[id];
+    if (oldSynth) removeSynth(id);
+    activeSynths[id] = newSynth;
+  };
 
-    gain.connect(audio.destination);
-    osc.start(0);
+  const play = (note, playing = true, fromMouse = false) => {
+    if (arpMode) {
+      const arr = [...arpArray, note];
+      if (playing) setArpArray(arr);
+    } else if (fromMouse) {
+      const synth = new Tone[instrument]().toDestination();
+      synth.triggerAttackRelease(note, '8n');
+    } else {
+      const { current: activeSynths } = activeSynthsRef;
+      if (playing) {
+        const synth = new Tone[instrument]().toDestination();
+        synth.triggerAttack(note);
+        addSynth(note, synth);
+      } else {
+        const synth = activeSynths[note];
+        if (synth) synth.triggerRelease();
+        removeSynth(note);
+      }
+    }
+  };
 
-    gain.gain.exponentialRampToValueAtTime(
-      0.00001,
-      audio.currentTime + duration
-    );
+  const clearSynths = () => {
+    const active = activeSynthsRef.current;
+    const synths = Object.keys(active);
+    synths.forEach((id) => {
+      removeSynth(id);
+    });
   };
 
   useKeyDown(({ key }) => {
-    if (key === 'Escape' && audio) {
-      audio.close();
-      audio = new AudioContext();
+    if (key === 'Escape') {
+      clearSynths();
+      // clearPatterns();
     }
   });
 
   return (
     <Container style={{ paddingTop: 50 }}>
+      <Button type="button" onClick={init} content="Init" />
+      <Button type="button" onClick={clearSynths} content="Clear Synths" />
       <SoundTypes />
-      <Duration />
+      <Patterns setArpMode={setArpMode} />
       <Keyboard playNote={play} />
       <Octave />
     </Container>

@@ -14,11 +14,8 @@ const Keyboard = ({ playNote }) => {
 
   const handleNote = (note, event, play) => {
     if (!event.repeat) {
-      if (play) playNote(note);
-
-      // const type = play ? ADD_PLAYING_KEY : REMOVE_PLAYING_KEY;
-      // dispatch({ type, payload: note });
-
+      // if (play) playNote(note);
+      playNote(note, play);
       const keys = play
         ? [...playingKeys, note]
         : playingKeys.filter((key) => key !== note);
@@ -35,68 +32,81 @@ const Keyboard = ({ playNote }) => {
       case 'a':
       case 'A':
       case 'å':
-        note = notes.C[octave];
+        // note = notes.C[octave];
+        note = `C${octave}`;
         break;
       case 'w':
       case 'W':
       case '∑':
-        note = notes['C#'][octave];
+        // note = notes['C#'][octave];
+        note = `C#${octave}`;
         break;
       case 's':
       case 'S':
       case 'ß':
-        note = notes.D[octave];
+        // note = notes.D[octave];
+        note = `D${octave}`;
         break;
       case 'e':
       case 'E':
       case '´':
-        note = notes.Eb[octave];
+        // note = notes.Eb[octave];
+        note = `Eb${octave}`;
         break;
       case 'd':
       case 'D':
       case '∂':
-        note = notes.E[octave];
+        // note = notes.E[octave];
+        note = `E${octave}`;
         break;
       case 'f':
       case 'F':
       case 'ƒ':
-        note = notes.F[octave];
+        // note = notes.F[octave];
+        note = `F${octave}`;
         break;
       case 'u':
       case 'U':
       case '¨':
-        note = notes['F#'][octave];
+        // note = notes['F#'][octave];
+        note = `F#${octave}`;
         break;
       case 'j':
       case 'J':
       case '∆':
-        note = notes.G[octave];
+        // note = notes.G[octave];
+        note = `G${octave}`;
         break;
       case 'i':
       case 'I':
       case 'ˆ':
-        note = notes['G#'][octave];
+        // note = notes['G#'][octave];
+        note = `G#${octave}`;
         break;
       case 'k':
       case 'K':
       case '˚':
-        note = notes.A[octave];
+        // note = notes.A[octave];
+        note = `A${octave}`;
         break;
       case 'o':
       case 'O':
       case 'ø':
-        note = notes.Bb[octave];
+        // note = notes.Bb[octave];
+        note = `Bb${octave}`;
         break;
       case 'l':
       case 'L':
       case '¬':
-        note = notes.B[octave];
+        // note = notes.B[octave];
+        note = `B${octave}`;
         break;
       case ';':
       case ':':
       case '…':
         if (octave < 8) {
-          note = notes.C[octave + 1];
+          // note = notes.C[octave + 1];
+          note = `C${octave + 1}`;
           break;
         } else return;
       default:
@@ -115,21 +125,22 @@ const Keyboard = ({ playNote }) => {
     width: 52,
   };
 
-  const keys = Object.entries(notes);
-  const upperC = notes.C[octave + 1];
+  const keys = Object.keys(notes);
+  // const upperC = notes.C[octave + 1];
+  const upperC = `C${octave + 1}`;
 
   return (
     <>
       <h2>Keyboard</h2>
       <KeysContainer>
-        {keys.map(([note, frequencies]) => {
-          const frequency = frequencies[octave];
+        {keys.map((note) => {
+          const noteName = `${note}${octave}`;
           return (
             <Button
-              key={frequency}
+              key={noteName}
               name={note}
-              onClick={() => playNote(frequency)}
-              active={playingKeys.includes(frequency)}
+              onClick={() => playNote(noteName, undefined, true)}
+              active={playingKeys.includes(noteName)}
               style={note.length > 1 ? styles : null}
             >
               {note.length > 1 ? (
@@ -146,7 +157,7 @@ const Keyboard = ({ playNote }) => {
         {octave < 8 && (
           <Button
             name="C+"
-            onClick={() => playNote(upperC)}
+            onClick={() => playNote(upperC, undefined, true)}
             active={playingKeys.includes(upperC)}
           >
             C
