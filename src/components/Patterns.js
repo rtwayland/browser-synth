@@ -1,15 +1,26 @@
+import styled from '@emotion/styled';
 import React, { useContext, useState } from 'react';
-import { Button } from 'semantic-ui-react';
+import { Button, Label } from 'semantic-ui-react';
 import * as Tone from 'tone';
 import { v4 as uuid } from 'uuid';
 import { store } from '../store';
 import { RESET_ARP_ARRAY, SET_ARP_MODE } from '../types';
+
+const MIN = 10;
+const MAX = 500;
+const INC = 10;
 
 const Patterns = () => {
   const { arpMode, arpArray, soundType: instrument, dispatch } = useContext(
     store
   );
   const [activePatterns, setActivePatterns] = useState([]);
+  const [patternSpeed, setPatternSpeed] = useState(200);
+
+  const handleSpeed = ({ target }) => {
+    const speed = parseFloat(target.value);
+    setPatternSpeed(speed);
+  };
 
   const removePattern = ({ id, pattern }) => {
     if (id) {
@@ -42,6 +53,7 @@ const Patterns = () => {
     activePatterns.forEach((pattern) => {
       removePattern(pattern);
     });
+    setActivePatterns([]);
   };
 
   const startArp = () => {
@@ -60,7 +72,7 @@ const Patterns = () => {
         loopStyle
       );
       pattern.start(0);
-      Tone.Transport.bpm.value = 200;
+      Tone.Transport.bpm.value = patternSpeed;
       Tone.Transport.start();
       addPattern({ id, pattern, notes, playing: true });
     }
@@ -75,40 +87,76 @@ const Patterns = () => {
         onClick={() => dispatch({ type: SET_ARP_MODE, payload: true })}
         icon="plus"
       />
+      <DurationContainer>
+        <Label size="big">
+          Arpeggio Speed:
+          <Label.Detail>{patternSpeed}</Label.Detail>
+        </Label>
+        <SliderContainer>
+          <input
+            type="range"
+            value={patternSpeed}
+            min={MIN}
+            max={MAX}
+            step={INC}
+            onChange={handleSpeed}
+            style={{ width: 450 }}
+          />
+        </SliderContainer>
+      </DurationContainer>
       {arpMode && (
         <>
           <h3>New Arpeggio</h3>
           <div>
-            {arpArray.map((note) => {
-              const key = uuid();
-              return <Button key={key} content={note} />;
-            })}
+            {arpArray.map((note) => (
+              <Button key={uuid()} content={note} />
+            ))}
             {arpArray.length ? (
-              <Button onClick={startArp} content="Start" />
+              <>
+                <Button primary onClick={startArp} content="Start" />
+                <Button
+                  negative
+                  onClick={() => dispatch({ type: RESET_ARP_ARRAY })}
+                  icon="close"
+                />
+              </>
             ) : (
               <div>Selct notes from the keyboard below</div>
             )}
           </div>
         </>
       )}
-      <h3>Active Patterns</h3>
-      {activePatterns.map((activePattern, i) => {
+      {activePatterns.length ? <h3>Active Patterns</h3> : null}
+      {activePatterns.map((activePattern) => {
         const { id, notes, playing } = activePattern;
         return (
           <div key={id} style={{ margin: '10px 0' }}>
             {notes.map((note) => (
-              <Button key={`${id}${note}${i + 1}`} content={note} />
+              <Button key={uuid()} content={note} />
             ))}
             <Button
+              primary
               onClick={() => handlePlayPause(activePattern)}
               icon={playing ? 'pause' : 'play'}
             />
-            <Button onClick={() => removePattern(activePattern)} icon="close" />
+            <Button
+              negative
+              onClick={() => removePattern(activePattern)}
+              icon="close"
+            />
           </div>
         );
       })}
     </>
   );
 };
+
+const DurationContainer = styled.div({
+  marginTop: 15,
+});
+
+const SliderContainer = styled.div({
+  marginTop: 15,
+});
 
 export default Patterns;
