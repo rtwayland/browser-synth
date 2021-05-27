@@ -15,7 +15,6 @@ const App = () => {
 
   const init = async () => {
     await Tone.start();
-    console.log('ToneJS Ready');
   };
 
   const removeSynth = (id) => {

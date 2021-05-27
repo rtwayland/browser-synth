@@ -13,18 +13,16 @@ const SoundTypes = () => {
     <>
       <h2>Sound Types</h2>
       <div>
-        {soundTypes.map((type, i) => {
-          return (
-            <Button
-              key={type}
-              type="button"
-              primary={soundType === soundTypes[i]}
-              onClick={() => handleTypeChange(type)}
-            >
-              {type}
-            </Button>
-          );
-        })}
+        {soundTypes.map((type, i) => (
+          <Button
+            key={type}
+            type="button"
+            primary={soundType === soundTypes[i]}
+            onClick={() => handleTypeChange(type)}
+          >
+            {type}
+          </Button>
+        ))}
       </div>
     </>
   );
